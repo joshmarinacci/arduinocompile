@@ -1,6 +1,7 @@
 package com.joshondesign.arduino.common;
 
 import java.io.*;
+import java.net.URL;
 import java.util.List;
 
 public class Util {
@@ -39,6 +40,17 @@ public class Util {
         return string.toString();
     }
 
+    public static String toString(URL url) throws IOException {
+        Reader in = new InputStreamReader(url.openStream());
+        StringBuffer string = new StringBuffer();
+        char[] buffer = new char[256];
+        while(true) {
+            int n = in.read(buffer);
+            if(n < 0) break;
+            string.append(buffer,0,n);
+        }
+        return string.toString();
+    }
     public static void toFile(String s, File file) throws IOException {
         FileWriter out = new FileWriter(file);
         out.write(s);
