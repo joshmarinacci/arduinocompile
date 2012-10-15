@@ -17,12 +17,30 @@ public class CompileTask {
 //                        task.setArduinoLibrariesDir(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/libraries"));
 //                        task.setHardwareDir(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/hardware/"));
 
-    public static void main(String ... args) throws IOException {
+    public static void main(String ... args) throws IOException, Exception {
+        Device uno = new Device();
+        uno.name = "Arduino Uno";
+        uno.protocol = "arduino";
+        uno.maximum_size = 32256;
+        uno.upload_speed=115200;
+        uno.low_fuses = 0xff;
+        uno.high_fuses=0xde;
+        uno.extended_fuses=0xde;
+        uno.path="optiboot";
+        uno.file="optiboot_atmega328.hex";
+        uno.unlock_bits = 0x3f;
+        uno.lock_bits = 0x0F;
+        uno.mcu="atmega328p";
+        uno.f_cpu="16000000L";
+        uno.core = "arduino";
+        uno.variant = "standard";
+        
         CompileTask task = new CompileTask();
-        //task.setSketchDir(new File("/Users/Josh/Documents/Arduino/Blink"));
-        task.setSketchDir(new File("/Users/josh/Documents/Arduino/led_test_03"));
+        task.setSketchDir(new File("/Users/Josh/Documents/Arduino/Blink"));
+        //task.setSketchDir(new File("/Users/josh/Documents/Arduino/led_test_03"));
         task.setUserLibrariesDir(new File("/Users/josh/Documents/Arduino/Libraries"));
         task.setArduinoRoot(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/"));
+        task.setDevice(uno);
         task.assemble();
         task.download();
     }
@@ -79,7 +97,7 @@ public class CompileTask {
 
      */
 
-    public void assemble() throws IOException {
+    public void assemble() throws IOException, Exception {
         Util.p(sketchDir.list());
         Util.p("sketch path = " + sketchDir.getAbsolutePath());
         for(String file : sketchDir.list()) {
@@ -308,7 +326,7 @@ public class CompileTask {
         return comm;
     }
 
-    private void compile(File tempdir, List<File> cFiles, List<File> includePaths) {
+    private void compile(File tempdir, List<File> cFiles, List<File> includePaths) throws Exception {
         File avrBase = new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin");
         for(File file : cFiles) {
             if(file.getName().toLowerCase().endsWith(".c")) {
@@ -382,8 +400,11 @@ public class CompileTask {
         return comm;
     }
 
-    private void execCommand(List<String> comm) {
-        //Util.p("=== execing ==============");
+    
+    boolean errorHappened = false;
+    String errorString = null;
+    private void execCommand(List<String> comm) throws Exception {
+        Util.p("=== execing ==============");
         for(String c : comm) {
             System.out.print(c + " ");
         }
@@ -393,12 +414,17 @@ public class CompileTask {
             Process process = Runtime.getRuntime().exec(comm.toArray(new String[0]));
             MessageSiphon in = new MessageSiphon(process.getInputStream(), new MessageConsumer() {
                 public void message(String s) {
-                    Util.p(s);
+                    Util.p("message = " + s);
                 }
             });
             MessageSiphon err = new MessageSiphon(process.getErrorStream(), new MessageConsumer() {
                 public void message(String s) {
-                    Util.p(s);
+                    Util.p("error = " + s);
+                    if(s.contains("error:")) {
+                        Util.p("it's an error");
+                        errorHappened = true;
+                        errorString = s;
+                    }
                 }
             });
             try {
@@ -408,6 +434,10 @@ public class CompileTask {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+            if(errorHappened) {
+                throw new CompileException("compiler error",errorString);
+            }
+                
             //System.out.println("result is " + result);
             
         } catch (IOException e) {
