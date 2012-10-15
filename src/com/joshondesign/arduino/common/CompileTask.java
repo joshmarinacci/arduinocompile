@@ -12,17 +12,17 @@ import java.util.regex.Pattern;
 
 public class CompileTask {
     private File sketchDir;
-    private File hardwareDir;
+    private File root;
     private File userLibrariesDir;
-    private File arduinoLibrariesDir;
+//                        task.setArduinoLibrariesDir(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/libraries"));
+//                        task.setHardwareDir(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/hardware/"));
 
     public static void main(String ... args) throws IOException {
         CompileTask task = new CompileTask();
         //task.setSketchDir(new File("/Users/Josh/Documents/Arduino/Blink"));
         task.setSketchDir(new File("/Users/josh/Documents/Arduino/led_test_03"));
         task.setUserLibrariesDir(new File("/Users/josh/Documents/Arduino/Libraries"));
-        task.setArduinoLibrariesDir(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/libraries"));
-        task.setHardwareDir(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/hardware/"));
+        task.setArduinoRoot(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/"));
         task.assemble();
         task.download();
     }
@@ -90,6 +90,7 @@ public class CompileTask {
         
         Util.p("sketch name = " + sketchName);
 
+        File hardwareDir = new File(root,"hardware");
         Util.p("hardware dir = " + hardwareDir);
         Util.p("device core = " + device.getCore());
         File avrBase = new File(hardwareDir, "tools/avr/bin");
@@ -132,6 +133,7 @@ public class CompileTask {
 
 
 
+        File arduinoLibrariesDir = new File(root,"libraries");
         //list of all possible libraries
         List<File> libraryDirs = new ArrayList<File>();
         libraryDirs.addAll(Arrays.asList(arduinoLibrariesDir.listFiles()));
@@ -417,15 +419,6 @@ public class CompileTask {
         this.sketchDir = sketchDir;
     }
 
-    public void setHardwareDir(File hardwareDir) {
-        this.hardwareDir = hardwareDir;
-    }
-
-    public void setArduinoLibrariesDir(File arduinoLibrariesDir) {
-        this.arduinoLibrariesDir = arduinoLibrariesDir;
-    }
-
-
     public void download() {
         Uploader uploader = new AvrdudeUploader();
         File buildPath = new File("/tmp/blah");
@@ -449,5 +442,9 @@ public class CompileTask {
         Util.p("current device set to: " + currentDevice);
         Util.p("current device set to: " + currentDevice.getCore());
         this.device = currentDevice;
+    }
+
+    public void setArduinoRoot(File file) {
+        this.root = file;
     }
 }
