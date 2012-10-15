@@ -90,9 +90,11 @@ public class CompileTask {
         
         Util.p("sketch name = " + sketchName);
 
+        Util.p("hardware dir = " + hardwareDir);
+        Util.p("device core = " + device.getCore());
         File avrBase = new File(hardwareDir, "tools/avr/bin");
-        File corePath = new File(new File(hardwareDir,"arduino/cores"),device.core);
-        File variantPath = new File(new File(hardwareDir,"arduino/variants/"),device.variant);
+        File corePath = new File(new File(hardwareDir,"arduino/cores"),device.getCore());
+        File variantPath = new File(new File(hardwareDir,"arduino/variants/"),device.getVariant());
 
         
         List<File> includePaths = new ArrayList<File>();
@@ -111,8 +113,11 @@ public class CompileTask {
         //assemble the C file
         StringBuffer code = new StringBuffer();
         for(File sketchFile : sketchDir.listFiles()) {
-            //code.append("#line 1 \"" + sketchFile.getName()+ "\"\n");
-            //code.append(Util.toString(sketchFile));
+            if(sketchFile.getName().toLowerCase().endsWith(".ino")) {
+                Util.p("appending: " + sketchFile);
+                //code.append("#line 1 \"" + sketchFile.getName()+ "\"\n");
+                code.append(Util.toString(sketchFile));
+            }
         }
         //Util.toFile(code.toString(),cfile);
         //Util.p(code.toString());
@@ -169,6 +174,8 @@ public class CompileTask {
         //link everything into core.a
         for(File file : tempdir.listFiles()) {
             if(file.getName().toLowerCase().endsWith(".o")) {
+                if(file.getName().toLowerCase().startsWith("blink")) continue;
+                
                 List<String> linkCommand = generateCoreACommand(avrBase, tempdir);
                 linkCommand.add(file.getAbsolutePath());
                 execCommand(linkCommand);
@@ -184,7 +191,7 @@ public class CompileTask {
         linkElf.add(new File(avrBase,"avr-gcc").getAbsolutePath());
         linkElf.add("-Os"); //??
         linkElf.add("-Wl,--gc-sections" + "");//not using relax yet
-        linkElf.add("-mmcu="+device.mcu);//atmega168
+        linkElf.add("-mmcu="+device.getMCU());//atmega168
         linkElf.add("-o");
         linkElf.add(new File(tempdir,sketchName+".cpp.elf").getAbsolutePath());
         /*
@@ -324,12 +331,12 @@ public class CompileTask {
         comm.add("-fno-exceptions"); // ??
         comm.add("-ffunction-sections"); // put each function in it's own section
         comm.add("-fdata-sections"); // ??
-        comm.add("-mmcu="+device.mcu);
-        comm.add("-DF_CPU="+device.f_cpu);
+        comm.add("-mmcu="+device.getMCU());
+        comm.add("-DF_CPU="+device.getFCPU());
         comm.add("-MMD"); //output dependency info
         comm.add("-DARDUINO=101");
-        comm.add("-DUSB_VID="+device.vid);
-        comm.add("-DUSB_PID="+device.pid);
+        comm.add("-DUSB_VID="+device.getVID());
+        comm.add("-DUSB_PID="+device.getPID());
 
         for(File file : includePaths) {
             comm.add("-I"+file.getAbsolutePath());
@@ -354,8 +361,8 @@ public class CompileTask {
         comm.add("-ffunction-sections"); //place each function in its own section
         comm.add("-fdata-sections"); //??
         //comm.add("-assembler-with-cpp"); //???
-        comm.add("-mmcu="+device.mcu);//atmega168
-        comm.add("-DF_CPU="+device.f_cpu);//16000000L
+        comm.add("-mmcu="+device.getMCU());//atmega168
+        comm.add("-DF_CPU="+device.getFCPU());//16000000L
         comm.add("-MMD"); //output dependency info
         comm.add("-DARDUINO=101");
         comm.add("-DUSB_VID=");
@@ -422,9 +429,10 @@ public class CompileTask {
     public void download() {
         Uploader uploader = new AvrdudeUploader();
         File buildPath = new File("/tmp/blah");
-        String classname = "led_test_03.cpp";
+        String classname = "Blink.cpp";
         try {
             uploader.setUploadPortPath(this.portPath);
+            uploader.setDevice(this.device); 
             uploader.uploadUsingPreferences(buildPath.getAbsolutePath(),classname,false);
         } catch (RunnerException e) {
             e.printStackTrace();
@@ -439,7 +447,7 @@ public class CompileTask {
 
     public void setDevice(Device currentDevice) {
         Util.p("current device set to: " + currentDevice);
-        Util.p("current device set to: " + currentDevice.core);
+        Util.p("current device set to: " + currentDevice.getCore());
         this.device = currentDevice;
     }
 }

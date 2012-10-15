@@ -47,6 +47,7 @@ public abstract class Uploader implements MessageConsumer  {
 
     boolean verbose = true;
     private String uploadPortPath;
+    protected Device device;
 
     public Uploader() {
     }
@@ -221,6 +222,10 @@ public abstract class Uploader implements MessageConsumer  {
 
     String getUploadPortPath() {
         return this.uploadPortPath;
+    }
+
+    void setDevice(Device device) {
+        this.device = device;
     }
 
 }

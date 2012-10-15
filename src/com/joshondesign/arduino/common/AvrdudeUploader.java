@@ -49,10 +49,11 @@ public class AvrdudeUploader extends Uploader  {
     
     private boolean uploadViaBootloader(String buildPath, String className)
             throws RunnerException, SerialException {
+        Util.p("uploading to device using device.protocol " + this.device.getProtocol());
         //Map<String, String> boardPreferences = Base.getBoardPreferences();
         List commandDownloader = new ArrayList();
         //String protocol = boardPreferences.get("upload.protocol");
-        String protocol = "arduino";
+        String protocol = device.getProtocol();
 
         // avrdude wants "stk500v1" to distinguish it from stk500v2
         if (protocol.equals("stk500"))
@@ -148,7 +149,7 @@ public class AvrdudeUploader extends Uploader  {
                 + uploadPort);
 
         commandDownloader.add(
-                "-b" + Integer.parseInt("19200"));
+                "-b" + device.getUploadSpeed());//Integer.parseInt("19200"));
         commandDownloader.add("-D"); // don't erase
         //if (!Preferences.getBoolean("upload.verify")) commandDownloader.add("-V"); // disable verify
         commandDownloader.add("-Uflash:w:" + buildPath + File.separator + className + ".hex:i");
@@ -326,7 +327,7 @@ public class AvrdudeUploader extends Uploader  {
             commandDownloader.add("-q");
             commandDownloader.add("-q");
         }
-        commandDownloader.add("-p" + "atmega168");
+        commandDownloader.add("-p" + device.getMCU());//"atmega168");
         commandDownloader.addAll(params);
 
         return executeUploadCommand(commandDownloader);

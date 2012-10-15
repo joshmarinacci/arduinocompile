@@ -28,6 +28,46 @@ public class Device {
     public String vid = "";
     public String pid = "";
     public boolean disable_flushing;
+
+    String getCore() {
+        if(core == null) {
+            return compatible.core;
+        }
+        return core;
+    }
+
+    String getVariant() {
+        if(variant == null) return compatible.variant;
+        return variant;
+    }
+
+    String getMCU() {
+        if(mcu == null) return compatible.mcu;
+        return mcu;
+    }
+
+    String getFCPU() {
+        if(f_cpu == null) return compatible.f_cpu;
+        return f_cpu;
+    }
+
+    String getVID() {
+        return vid;
+    }
+    
+    String getPID() {
+        return pid;
+    }        
+
+    String getProtocol() {
+        if(protocol == null) return compatible.protocol;
+        return protocol;
+    }
+
+    int getUploadSpeed() {
+        if(upload_speed == 0) return compatible.upload_speed;
+        return upload_speed;
+    }
     
     
 }
