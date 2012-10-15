@@ -29,44 +29,53 @@ public class Device {
     public String pid = "";
     public boolean disable_flushing;
 
-    String getCore() {
+    public String getCore() {
         if(core == null) {
             return compatible.core;
         }
         return core;
     }
 
-    String getVariant() {
+    public String getVariant() {
         if(variant == null) return compatible.variant;
         return variant;
     }
 
-    String getMCU() {
+    public String getMCU() {
         if(mcu == null) return compatible.mcu;
         return mcu;
     }
 
-    String getFCPU() {
+    public String getFCPU() {
         if(f_cpu == null) return compatible.f_cpu;
         return f_cpu;
     }
 
-    String getVID() {
+    public String getVID() {
         return vid;
     }
     
-    String getPID() {
+    public String getPID() {
         return pid;
     }        
 
-    String getProtocol() {
+    public String getProtocol() {
         if(protocol == null) return compatible.protocol;
         return protocol;
     }
 
-    int getUploadSpeed() {
+    public int getUploadSpeed() {
         if(upload_speed == 0) return compatible.upload_speed;
         return upload_speed;
+    }
+    
+    public int getMaxSize() {
+        if(maximum_size == 0) return compatible.maximum_size;
+        return maximum_size;
+    }
+
+    public String getName() {
+        return name;
     }
     
     
