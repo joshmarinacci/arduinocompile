@@ -34,6 +34,10 @@ import java.util.List;
 
 
 public class Serial implements SerialPortEventListener {
+    public static void main(String ... args) throws SerialException {
+        Serial serial = new Serial("/dev/cu.usbserial-A4018A2A", 9600, 'N', 8, 1.0f);
+        serial.dispose();
+    }
 
     //PApplet parent;
 
@@ -149,20 +153,21 @@ public class Serial implements SerialPortEventListener {
                         (CommPortIdentifier) portList.nextElement();
 
                 if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-                    //System.out.println("found " + portId.getName());
+                    System.out.println("found " + portId.getName());
                     if (portId.getName().equals(iname)) {
-                        //System.out.println("looking for "+iname);
+                        System.out.println("looking for "+iname);
                         port = (SerialPort)portId.open("serial madness", 2000);
                         input = port.getInputStream();
                         output = port.getOutputStream();
                         port.setSerialPortParams(rate, databits, stopbits, parity);
                         port.addEventListener(this);
                         port.notifyOnDataAvailable(true);
-                        //System.out.println("opening, ready to roll");
+                        System.out.println("opening, ready to roll");
                     }
                 }
             }
         } catch (PortInUseException e) {
+            e.printStackTrace();
             throw new SerialException("Serial port " + iname + " already in use. Try quiting any programs that may be using it.");
         } catch (Exception e) {
             throw new SerialException("Error opening serial port ''{0}''."+ iname );
@@ -196,6 +201,9 @@ public class Serial implements SerialPortEventListener {
 
 
     public void dispose() {
+        Util.p("about to close ports");
+        port.close();
+        Util.p("about to close io");
         try {
             // do io streams need to be closed first?
             if (input != null) input.close();
