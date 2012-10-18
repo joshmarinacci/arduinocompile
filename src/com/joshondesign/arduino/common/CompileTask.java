@@ -14,8 +14,6 @@ public class CompileTask {
     private File sketchDir;
     private File root;
     private File userLibrariesDir;
-//                        task.setArduinoLibrariesDir(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/libraries"));
-//                        task.setHardwareDir(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/hardware/"));
 
     public static void main(String ... args) throws IOException, Exception {
         Device uno = new Device();
@@ -46,6 +44,7 @@ public class CompileTask {
     }
     private String portPath;
     private Device device;
+    private List<OutputListener> listeners = new ArrayList<>();
 
 
     public void setUserLibrariesDir(File file) {
@@ -97,20 +96,15 @@ public class CompileTask {
 
      */
 
+    public void setOutputListener(OutputListener l) {
+        this.listeners.add(l);
+    }
     public void assemble() throws IOException, Exception {
-        Util.p(sketchDir.list());
-        Util.p("sketch path = " + sketchDir.getAbsolutePath());
-        for(String file : sketchDir.list()) {
-            Util.p("   file = ",file);
-        }
+        log("assembling sketch in directory: " + sketchDir.getAbsolutePath());
         
         String sketchName = sketchDir.getName();
         
-        Util.p("sketch name = " + sketchName);
-
         File hardwareDir = new File(root,"hardware");
-        Util.p("hardware dir = " + hardwareDir);
-        Util.p("device core = " + device.getCore());
         File avrBase = new File(hardwareDir, "tools/avr/bin");
         File corePath = new File(new File(hardwareDir,"arduino/cores"),device.getCore());
         File variantPath = new File(new File(hardwareDir,"arduino/variants/"),device.getVariant());
@@ -125,21 +119,20 @@ public class CompileTask {
 
         //File tempdir = Util.createTempDir("josharduinobuild");
         File tempdir = new File("/tmp/blah");
+        log("using temp dir: " + tempdir.getAbsolutePath());
         tempdir.mkdirs();
         File cfile = new File(tempdir,sketchName+".cpp");
         Util.p("sketch c file " + cfile.getAbsolutePath());
+        log("generating C/C++ file: " + cfile.getAbsolutePath());
         
         //assemble the C file
         StringBuffer code = new StringBuffer();
         for(File sketchFile : sketchDir.listFiles()) {
             if(sketchFile.getName().toLowerCase().endsWith(".ino")) {
-                Util.p("appending: " + sketchFile);
                 //code.append("#line 1 \"" + sketchFile.getName()+ "\"\n");
                 code.append(Util.toString(sketchFile));
             }
         }
-        //Util.toFile(code.toString(),cfile);
-        //Util.p(code.toString());
 
         FileWriter writer = new FileWriter(cfile);
 
@@ -160,7 +153,7 @@ public class CompileTask {
 
 
         //compile the sketch itself
-        Util.p("============ compiling the sketch");
+        log("compiling the sketch");
         List<File> cFiles = new ArrayList<File>();
         cFiles.add(cfile);
         includePaths.addAll(calculateIncludePaths(sketchDir,libraryDirs));
@@ -168,7 +161,7 @@ public class CompileTask {
 
         
         //compile any 3rd party libs used
-        Util.p("============ compiling 3rd party libs");
+        log("compiling 3rd party libs (if any)");
         cFiles.clear();
         List<File> libPaths = new ArrayList<File>();
         libPaths.addAll(calculateIncludePaths(sketchDir, libraryDirs));
@@ -181,7 +174,7 @@ public class CompileTask {
         compile(tempdir,cFiles,includePaths);
 
 
-        Util.p("============ compiling the core");
+        log("compiling the core libs");
         //compile the core code
         includePaths.clear();
         includePaths.add(corePath);
@@ -203,7 +196,7 @@ public class CompileTask {
         }
 
 
-
+        log("linking");
         // 4. link it all together into the .elf file
         // For atmega2560, need --relax linker option to link larger
         // programs correctly.
@@ -229,8 +222,8 @@ public class CompileTask {
 
 
 
-
         // 5. extract EEPROM data (from EEMEM directive) to .eep file.
+        log("extracting EEPROM data");
         List<String> objCopy1 = new ArrayList<String>();
         objCopy1.add(new File(avrBase, "avr-objcopy").getAbsolutePath());
         objCopy1.add("-O");
@@ -248,6 +241,7 @@ public class CompileTask {
 
 
         // 6. build the .hex file
+        log("building .HEX file");
         List<String> objCopy = new ArrayList<String>();
         objCopy.add(new File(avrBase,"avr-objcopy").getAbsolutePath());
         objCopy.add("-O");
@@ -404,22 +398,22 @@ public class CompileTask {
     boolean errorHappened = false;
     String errorString = null;
     private void execCommand(List<String> comm) throws Exception {
-        Util.p("=== execing ==============");
+        StringBuilder sb = new StringBuilder();
         for(String c : comm) {
-            System.out.print(c + " ");
+            sb.append(c);
+            sb.append(" ");
         }
-        System.out.println();
-        //Util.p(comm);
+        exec(sb.toString());
         try {
             Process process = Runtime.getRuntime().exec(comm.toArray(new String[0]));
             MessageSiphon in = new MessageSiphon(process.getInputStream(), new MessageConsumer() {
                 public void message(String s) {
-                    Util.p("message = " + s);
+                    stdout(s);
                 }
             });
             MessageSiphon err = new MessageSiphon(process.getErrorStream(), new MessageConsumer() {
                 public void message(String s) {
-                    Util.p("error = " + s);
+                    stderr(s);
                     if(s.contains("error:")) {
                         Util.p("it's an error");
                         errorHappened = true;
@@ -469,12 +463,31 @@ public class CompileTask {
     }
 
     public void setDevice(Device currentDevice) {
-        Util.p("current device set to: " + currentDevice);
-        Util.p("current device set to: " + currentDevice.getCore());
         this.device = currentDevice;
     }
 
     public void setArduinoRoot(File file) {
         this.root = file;
+    }
+
+    private void log(String string) {
+        for(OutputListener l : listeners) {
+            l.log(string);
+        }
+    }
+    private void exec(String string) {
+        for(OutputListener l : listeners) {
+            l.exec(string);
+        }
+    }
+    private void stdout(String string) {
+        for(OutputListener l : listeners) {
+            l.stdout(string);
+        }
+    }
+    private void stderr(String string) {
+        for(OutputListener l : listeners) {
+            l.stderr(string);
+        }
     }
 }
