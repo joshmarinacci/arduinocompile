@@ -35,7 +35,6 @@ public class CompileTask {
         
         CompileTask task = new CompileTask();
         task.setSketchDir(new File("/Users/Josh/Documents/Arduino/Blink"));
-        //task.setSketchDir(new File("/Users/josh/Documents/Arduino/led_test_03"));
         task.setUserLibrariesDir(new File("/Users/josh/Documents/Arduino/Libraries"));
         task.setArduinoRoot(new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/"));
         task.setDevice(uno);
@@ -157,7 +156,7 @@ public class CompileTask {
         List<File> cFiles = new ArrayList<File>();
         cFiles.add(cfile);
         includePaths.addAll(calculateIncludePaths(sketchDir,libraryDirs));
-        compile(tempdir,cFiles,includePaths);
+        compile(avrBase,tempdir,cFiles,includePaths);
 
         
         //compile any 3rd party libs used
@@ -171,7 +170,7 @@ public class CompileTask {
                 if(file.getName().toLowerCase().endsWith(".cpp")) cFiles.add(file);
             }
         }
-        compile(tempdir,cFiles,includePaths);
+        compile(avrBase,tempdir,cFiles,includePaths);
 
 
         log("compiling the core libs");
@@ -181,7 +180,7 @@ public class CompileTask {
         includePaths.add(variantPath);
         cFiles.clear();
         cFiles.addAll(Arrays.asList(corePath.listFiles()));
-        compile(tempdir,cFiles,includePaths);
+        compile(avrBase, tempdir,cFiles,includePaths);
 
 
         //link everything into core.a
@@ -320,8 +319,7 @@ public class CompileTask {
         return comm;
     }
 
-    private void compile(File tempdir, List<File> cFiles, List<File> includePaths) throws Exception {
-        File avrBase = new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin");
+    private void compile(File avrBase, File tempdir, List<File> cFiles, List<File> includePaths) throws Exception {
         for(File file : cFiles) {
             if(file.getName().toLowerCase().endsWith(".c")) {
                 List<String> comm = generateCCommand(tempdir, avrBase, file, includePaths);
@@ -444,7 +442,8 @@ public class CompileTask {
     }
 
     public void download() {
-        Uploader uploader = new AvrdudeUploader();
+        AvrdudeUploader uploader = new AvrdudeUploader();
+        uploader.root = this.root;
         File buildPath = new File("/tmp/blah");
         String classname = "Blink.cpp";
         try {

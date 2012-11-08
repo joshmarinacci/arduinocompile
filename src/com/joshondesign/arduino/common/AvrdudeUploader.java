@@ -33,6 +33,8 @@ import java.util.List;
 
 
 public class AvrdudeUploader extends Uploader  {
+    File root;
+    
     public AvrdudeUploader() {
     }
 
@@ -275,7 +277,7 @@ public class AvrdudeUploader extends Uploader  {
             //File bootloadersFile = new File(t.getFolder(), "bootloaders");
             //File bootloaderFile = new File(bootloadersFile, bootloaderPath);
             //bootloaderPath = bootloaderFile.getAbsolutePath();
-            bootloaderPath = new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/hardware/arduino/bootloaders/atmega").getAbsolutePath();
+            bootloaderPath = new File(root,"/hardware/arduino/bootloaders/atmega").getAbsolutePath();
 
             bootloader.add("-Uflash:w:" + new File(bootloaderPath,"ATmegaBOOT_168_diecimila.hex").getAbsolutePath() + ":i");
             //bootloader.add("-Uflash:w:" + bootloaderPath + File.separator +
@@ -299,7 +301,8 @@ public class AvrdudeUploader extends Uploader  {
     public boolean avrdude(Collection params) throws RunnerException {
         List commandDownloader = new ArrayList();
 
-        File hardwarePath = new File("/Users/josh/projects/Arduino.app/Contents/Resources/Java/hardware/");
+        File hardwarePath = new File(root,"hardware");
+
 
         if(Util.isLinux()) {
             File avrdude = new File(hardwarePath,"tools/avrdude"); 

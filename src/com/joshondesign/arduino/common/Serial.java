@@ -222,6 +222,7 @@ public class Serial implements SerialPortEventListener {
             e.printStackTrace();
         }
         port = null;
+        Util.p("port is closed now");
     }
 
 
@@ -231,13 +232,13 @@ public class Serial implements SerialPortEventListener {
 
 
     synchronized public void serialEvent(SerialPortEvent serialEvent) {
-        //System.out.println("serial port event"); // " + serialEvent);
-        //System.out.flush();
-        //System.out.println("into");
-        //System.out.flush();
-        //System.err.println("type " + serialEvent.getEventType());
-        //System.err.println("ahoooyey");
-        //System.err.println("ahoooyeysdfsdfsdf");
+        System.out.println("serial port event"); // " + serialEvent);
+        System.out.flush();
+        System.out.println("into");
+        System.out.flush();
+        System.err.println("type " + serialEvent.getEventType());
+        System.err.println("ahoooyey");
+        System.err.println("ahoooyeysdfsdfsdf");
         if (serialEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             //System.out.println("data available");
             //System.err.flush();
@@ -259,20 +260,21 @@ public class Serial implements SerialPortEventListener {
                         if (this.consumer != null)
                             this.consumer.message("" + (char) input.read());
 
-                        /*
-                        System.err.println(input.available() + " " +
-                                           ((char) buffer[bufferLast-1]));
-                        */            //}
+                        
+//                        System.err.println(input.available() + " " +
+//                                           ((char) buffer[bufferLast-1]));
+                                    //}
                     }
                 }
                 //System.out.println("no more");
 
             } catch (IOException e) {
                 errorMessage("serialEvent", e);
-                //e.printStackTrace();
+                e.printStackTrace();
                 //System.out.println("angry");
             }
             catch (Exception e) {
+                e.printStackTrace();
             }
         }
         //System.out.println("out of");
