@@ -144,10 +144,14 @@ public class CompileTask {
 
 
         File arduinoLibrariesDir = new File(root,"libraries");
+        Util.p("arduino libs dir = " + arduinoLibrariesDir.getAbsolutePath() + "\n   exists = " + arduinoLibrariesDir.exists());
+        Util.p("user libs dir = " + userLibrariesDir.getAbsolutePath());
         //list of all possible libraries
         List<File> libraryDirs = new ArrayList<File>();
         libraryDirs.addAll(Arrays.asList(arduinoLibrariesDir.listFiles()));
-        libraryDirs.addAll(Arrays.asList(userLibrariesDir.listFiles()));
+        if(userLibrariesDir.exists()){
+            libraryDirs.addAll(Arrays.asList(userLibrariesDir.listFiles()));
+        }
 
 
 
