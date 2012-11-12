@@ -104,7 +104,7 @@ public class CompileTask {
         String sketchName = sketchDir.getName();
         
         File hardwareDir = new File(root,"hardware");
-        File avrBase = new File(hardwareDir, "tools/avr/bin");
+        File avrBase = new File(root,"tools/avr/bin");
         File corePath = new File(new File(hardwareDir,"arduino/cores"),device.getCore());
         File variantPath = new File(new File(hardwareDir,"arduino/variants/"),device.getVariant());
 
