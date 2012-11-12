@@ -104,7 +104,7 @@ public class CompileTask {
         String sketchName = sketchDir.getName();
         
         File hardwareDir = new File(root,"hardware");
-        File avrBase = new File(root,"tools/avr/bin");
+        File avrBase = new File(root, "tools/avr/bin");
         File corePath = new File(new File(hardwareDir,"arduino/cores"),device.getCore());
         File variantPath = new File(new File(hardwareDir,"arduino/variants/"),device.getVariant());
 
@@ -147,7 +147,9 @@ public class CompileTask {
         //list of all possible libraries
         List<File> libraryDirs = new ArrayList<File>();
         libraryDirs.addAll(Arrays.asList(arduinoLibrariesDir.listFiles()));
-        libraryDirs.addAll(Arrays.asList(userLibrariesDir.listFiles()));
+        if(userLibrariesDir.exists()){
+            libraryDirs.addAll(Arrays.asList(userLibrariesDir.listFiles()));
+        }
 
 
 
@@ -490,3 +492,4 @@ public class CompileTask {
         }
     }
 }
+
