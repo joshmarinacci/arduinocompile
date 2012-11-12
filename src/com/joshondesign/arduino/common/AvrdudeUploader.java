@@ -305,18 +305,18 @@ public class AvrdudeUploader extends Uploader  {
 
 
         if(Util.isLinux()) {
-            File avrdude = new File(hardwarePath,"tools/avrdude"); 
+            File avrdude = new File(root,"tools/avrdude"); 
             if (avrdude.exists()) {
                 commandDownloader.add(avrdude);
-                commandDownloader.add("-C" + new File(hardwarePath,"tools/avrdude.conf").getAbsolutePath());
+                commandDownloader.add("-C" + new File(root,"tools/avrdude.conf").getAbsolutePath());
             } else {
                 commandDownloader.add("avrdude");
             }
         }
         else {
             //mac and window?
-            File avrdude = new File(hardwarePath,"tools/avr/bin/avrdude");
-            File conf = new File(hardwarePath,"tools/avr/etc/avrdude.conf");
+            File avrdude = new File(root,"tools/avr/bin/avrdude");
+            File conf = new File(root,"tools/avr/etc/avrdude.conf");
             commandDownloader.add(avrdude.getAbsolutePath());
             commandDownloader.add("-C" + conf.getAbsolutePath());
         }
