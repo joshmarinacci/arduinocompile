@@ -143,6 +143,7 @@ public class CompileTask {
 
 
 
+        Util.p("root dir = " + root.getAbsolutePath());
         File arduinoLibrariesDir = new File(root,"libraries");
         //list of all possible libraries
         List<File> libraryDirs = new ArrayList<File>();
