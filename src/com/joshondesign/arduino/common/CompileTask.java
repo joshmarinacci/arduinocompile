@@ -448,8 +448,7 @@ public class CompileTask {
         uploader.root = this.root;
         File buildPath = new File("/tmp/blah");
         String sketchName = sketchDir.getName();
-        String classname = sketchName+".cpp";
-        
+        String classname = sketchName+".cpp";        
         try {
             uploader.setUploadPortPath(this.portPath);
             uploader.setDevice(this.device); 
@@ -494,4 +493,5 @@ public class CompileTask {
         }
     }
 }
+
 
