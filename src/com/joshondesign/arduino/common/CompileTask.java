@@ -447,7 +447,9 @@ public class CompileTask {
         AvrdudeUploader uploader = new AvrdudeUploader();
         uploader.root = this.root;
         File buildPath = new File("/tmp/blah");
-        String classname = "Blink.cpp";
+        String sketchName = sketchDir.getName();
+        String classname = sketchName+".cpp";
+        
         try {
             uploader.setUploadPortPath(this.portPath);
             uploader.setDevice(this.device); 
