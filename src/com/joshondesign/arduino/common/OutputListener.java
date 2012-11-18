@@ -13,5 +13,6 @@ public interface OutputListener {
     public void exec(String string);
     public void stdout(String string);
     public void stderr(String string);
+    public void clear();
     
 }
