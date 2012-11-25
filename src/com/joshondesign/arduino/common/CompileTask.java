@@ -44,6 +44,7 @@ public class CompileTask {
     private String portPath;
     private Device device;
     private List<OutputListener> listeners = new ArrayList<>();
+    private File tempdir;
 
 
     public void setUserLibrariesDir(File file) {
@@ -116,8 +117,8 @@ public class CompileTask {
         includePaths.add(variantPath);
 
 
-        //File tempdir = Util.createTempDir("josharduinobuild");
-        File tempdir = new File("/tmp/blah");
+        this.tempdir = Util.createTempDir("josharduinobuild");
+        //File tempdir = new File("/tmp/blah");
         log("using temp dir: " + tempdir.getAbsolutePath());
         tempdir.mkdirs();
         File cfile = new File(tempdir,sketchName+".cpp");
@@ -444,7 +445,7 @@ public class CompileTask {
     }
 
     public void download() {
-        File buildPath = new File("/tmp/blah");
+//        File buildPath = new File("/tmp/blah");
         String sketchName = sketchDir.getName();
         String classname = sketchName+".cpp";        
         try {
@@ -452,7 +453,7 @@ public class CompileTask {
                 this.root,
                 this.portPath,
                 this.device,
-                buildPath.getAbsolutePath(),
+                tempdir.getAbsolutePath(),
                 classname,
                 true
                 );
