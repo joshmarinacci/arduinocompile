@@ -444,18 +444,24 @@ public class CompileTask {
     }
 
     public void download() {
-        AvrdudeUploader uploader = new AvrdudeUploader();
-        uploader.root = this.root;
         File buildPath = new File("/tmp/blah");
         String sketchName = sketchDir.getName();
         String classname = sketchName+".cpp";        
         try {
-            uploader.setUploadPortPath(this.portPath);
-            uploader.setDevice(this.device); 
-            uploader.uploadUsingPreferences(buildPath.getAbsolutePath(),classname,false);
+        AvrdudeUploader2 uploader = new AvrdudeUploader2(
+                this.root,
+                this.portPath,
+                this.device,
+                buildPath.getAbsolutePath(),
+                classname,
+                true
+                );
+        uploader.setOutputListener(this);
+        uploader.upload();
+//            uploader.setUploadPortPath(this.portPath);
+//            uploader.setDevice(this.device); 
+//            uploader.uploadUsingPreferences(buildPath.getAbsolutePath(),classname,false);
         } catch (RunnerException e) {
-            e.printStackTrace();
-        } catch (SerialException e) {
             e.printStackTrace();
         }
     }
@@ -482,12 +488,12 @@ public class CompileTask {
             l.exec(string);
         }
     }
-    private void stdout(String string) {
+    void stdout(String string) {
         for(OutputListener l : listeners) {
             l.stdout(string);
         }
     }
-    private void stderr(String string) {
+    void stderr(String string) {
         for(OutputListener l : listeners) {
             l.stderr(string);
         }
